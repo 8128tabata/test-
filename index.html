@@ -1,2 +1,210 @@
-テスト</br>
-テスト2
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ルービックキューブゲーム</title>
+<style>
+
+body{
+    margin:0;
+    background:#111;
+    color:white;
+    font-family:sans-serif;
+    text-align:center;
+}
+
+h1{
+    margin:10px;
+}
+
+#cube{
+    position:relative;
+    width:180px;
+    height:180px;
+    margin:100px auto;
+    transform-style:preserve-3d;
+    transform:rotateX(-30deg) rotateY(-30deg);
+    transition: transform 0.5s;
+}
+
+.face{
+    position:absolute;
+    width:180px;
+    height:180px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
+}
+
+.square{
+    border:2px solid black;
+}
+
+.front{ transform:translateZ(90px); }
+.back{ transform:rotateY(180deg) translateZ(90px); }
+.right{ transform:rotateY(90deg) translateZ(90px); }
+.left{ transform:rotateY(-90deg) translateZ(90px); }
+.top{ transform:rotateX(90deg) translateZ(90px); }
+.bottom{ transform:rotateX(-90deg) translateZ(90px); }
+
+button{
+    margin:5px;
+    padding:8px 12px;
+    font-size:14px;
+}
+
+#controls{
+    margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>ルービックキューブ</h1>
+
+<div id="cube"></div>
+
+<div id="controls">
+<button onclick="rotate('F')">前 (F)</button>
+<button onclick="rotate('R')">右 (R)</button>
+<button onclick="rotate('U')">上 (U)</button>
+<button onclick="rotate('L')">左 (L)</button>
+<button onclick="rotate('D')">下 (D)</button>
+<button onclick="rotate('B')">後 (B)</button>
+<br>
+<button onclick="scramble()">スクランブル</button>
+<button onclick="resetCube()">リセット</button>
+</div>
+
+<script>
+
+const colors = {
+    F:"green",
+    B:"blue",
+    R:"red",
+    L:"orange",
+    U:"white",
+    D:"yellow"
+}
+
+let cubeState
+
+function resetCube(){
+
+cubeState = {
+F:Array(9).fill(colors.F),
+B:Array(9).fill(colors.B),
+R:Array(9).fill(colors.R),
+L:Array(9).fill(colors.L),
+U:Array(9).fill(colors.U),
+D:Array(9).fill(colors.D)
+}
+
+drawCube()
+
+}
+
+function drawCube(){
+
+const cube=document.getElementById("cube")
+cube.innerHTML=""
+
+for(let face in cubeState){
+
+const div=document.createElement("div")
+div.className="face "+faceName(face)
+
+cubeState[face].forEach(c=>{
+const sq=document.createElement("div")
+sq.className="square"
+sq.style.background=c
+div.appendChild(sq)
+})
+
+cube.appendChild(div)
+
+}
+
+}
+
+function faceName(f){
+return {
+F:"front",
+B:"back",
+R:"right",
+L:"left",
+U:"top",
+D:"bottom"
+}[f]
+}
+
+function rotate(face){
+
+let f=cubeState[face]
+
+cubeState[face]=[
+f[6],f[3],f[0],
+f[7],f[4],f[1],
+f[8],f[5],f[2]
+]
+
+drawCube()
+
+}
+
+function scramble(){
+
+const faces=["F","B","R","L","U","D"]
+
+for(let i=0;i<20;i++){
+
+setTimeout(()=>{
+rotate(faces[Math.floor(Math.random()*6)])
+},i*80)
+
+}
+
+}
+
+let mouseDown=false
+let lastX,lastY
+let rotX=-30
+let rotY=-30
+
+const cube=document.getElementById("cube")
+
+cube.addEventListener("mousedown",e=>{
+mouseDown=true
+lastX=e.clientX
+lastY=e.clientY
+})
+
+document.addEventListener("mouseup",()=>{
+mouseDown=false
+})
+
+document.addEventListener("mousemove",e=>{
+
+if(!mouseDown) return
+
+let dx=e.clientX-lastX
+let dy=e.clientY-lastY
+
+rotY+=dx*0.5
+rotX-=dy*0.5
+
+cube.style.transform=`rotateX(${rotX}deg) rotateY(${rotY}deg)`
+
+lastX=e.clientX
+lastY=e.clientY
+
+})
+
+resetCube()
+
+</script>
+
+</body>
+</html>
